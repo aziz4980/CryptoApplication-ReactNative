@@ -1,8 +1,6 @@
-import {combineReducers} from 'redux';
-import { ImageComponent } from 'react-native';
-import CryproReducer from './CryptoReducer';
-
+import { combineReducers } from 'redux';
+import CryptoReducer from './CryptoReducers';
 
 export default combineReducers({
-    crypto: CryproReducer  
-})
+    crypto: CryptoReducer
+});

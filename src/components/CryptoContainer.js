@@ -1,73 +1,74 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { images } from '../Utils/CoinIcons';
+import React, {useEffect} from 'react';
+import {View, StyleSheet, ScrollView} from 'react-native';
+import {connect} from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
-import FetchCoinData from './../Actions/FetchCoinData';
+
 import CoinCard from './CoinCard';
+import FetchCoinData from './../Actions/FetchCoinData';
 
-class CryptoContainer extends Component {
+const CryptoContainer = props => {
+  useEffect(() => {
+    props.FetchCoinData();
+  }, []);
 
-    componentDidMount() {
-        this.props.FetchCoinData;
+  const {crypto} = props.FetchCoinData();
+  const {contentContainer} = styles;
 
-    }
-
-    renderCoinCards() {
-        const { crypto } = thos.props;
-        return crypto.data.map((coin) =>
-            <CoinCard
-                key={coin.name}
-                coin_name={coin.name}
-                symbol={coin.symbol}
-                price_usd={coin.price_usd}
-                percentage_change_24hr={coin.percentage_change_24hr}
-                percentage_change_7d={coin.percentage_change_7d}
-            />
-
-        )
-    }
-
-    render() {
-        const { crypto } = this.props;
-        const { contentContainer } = styles;
-
-        if (crypto, isFecthing) {
-            return (
-                <View>
-                    <Spinner
-                        visible={crypto, isFecthing}
-                        textContent={"Loading..."}
-                        textStyle={{ color: '#253145' }}
-                        animation="fade"
-                    />
-                </View>
-            )
+  const renderCoinCards = () => {
+    return crypto.data
+      .sort((a, b) => {
+        if (a.cmc_rank > b.cmc_rank) {
+          return 1;
         }
+        if (b.cmc_rank > a.cmc_rank) {
+          return -1;
+        }
+        return 0;
+      })
+      .map(coin => {
+        return (
+          <CoinCard
+            key={coin.id}
+            _coinName={coin.name}
+            _symbol={coin.symbol}
+            _priceUSD={coin.quote.USD.price}
+            _percentChange24h={coin.quote.USD.percent_change_24h}
+            _percentChange7d={coin.quote.USD.percent_change_7d}
+          />
+        );
+      });
+  };
 
-        return(
-            <ScrollView contentContainerStyle={contentContainer}>
-                {this.renderCoinCards}
+  if (crypto.isFetching === false) {
+    return (
+      <ScrollView contentContainerStyle={contentContainer}>
+        {renderCoinCards()}
+      </ScrollView>
+    );
+  }
 
-            </ScrollView>
-        )
-    } 
-   
-}
+  return (
+    <View>
+      <Spinner
+        visible={crypto.isFetching}
+        textContent={'Loading...'}
+        textStyle={{color: '#253145'}}
+        animation="fade"></Spinner>
+    </View>
+  );
+};
 
-const styles ={
-    contentContainer:{
-        paddingBottom: 100,
-        paddingTop: 55,
-        
-    }
-}
+const styles = StyleSheet.create({
+  contentContainer: {
+    paddingBottom: 100,
+  },
+});
 
-function mapStateToProps(state){
-    return{
-        crypto: state.crypto
-    }
-}
-export default connect(mapStateToProps, {FetchCoinData}) (CryptoContainer);
+const mapStateToProps = state => ({
+  crypto: state.crypto,
+});
 
-
+export default connect(
+  mapStateToProps,
+  {FetchCoinData},
+)(CryptoContainer);
